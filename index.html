@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>pstone — Old School Graffiti Players</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --accent:#ffde59; /* gold */
+      --neon:#ff4d6d; /* pink */
+      --green:#49ff9b;
+      --bg1:#111;
+      --card:#1b1b1b;
+      --glass: rgba(255,255,255,0.04);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Montserrat,system-ui,Arial,Helvetica,sans-serif;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,77,109,0.06), transparent 6%),
+        radial-gradient(circle at 85% 80%, rgba(73,255,155,0.03), transparent 8%),
+        linear-gradient(180deg,#0b0b0b 0%, #171717 50%, #0b0b0b 100%);
+      color:#eee;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:48px 32px;
+      background-attachment: fixed;
+    }
+
+    /* subtle graffiti spray marks using pseudo elements on body */
+    body::before, body::after{
+      content:""; position:fixed; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:0.14;
+      background-image:
+        radial-gradient(circle at 10% 10%, rgba(255,77,109,0.25), transparent 10%),
+        radial-gradient(circle at 90% 70%, rgba(73,255,155,0.18), transparent 12%),
+        radial-gradient(circle at 60% 30%, rgba(255,222,89,0.12), transparent 14%);
+    }
+    header{
+      display:flex; align-items:center; gap:18px; margin-bottom:28px;
+    }
+    .logo{
+      width:84px; height:84px; border-radius:12px; display:grid; place-items:center; background:linear-gradient(135deg,var(--neon),var(--accent));
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 -6px 18px rgba(0,0,0,0.2);
+      transform:rotate(-6deg);
+      border:3px solid rgba(255,255,255,0.06);
+    }
+    .logo h1{font-family:Bangers, "Helvetica Neue", Arial; font-size:28px; margin:0; color:#111; text-shadow:2px 2px 0 rgba(255,255,255,0.06)}
+
+    h2.title{font-family:Bangers, 'Montserrat'; font-size:34px; margin:0; letter-spacing:1px; color:var(--accent); text-shadow: 0 4px 18px rgba(255,222,89,0.12)}
+    p.lead{margin:6px 0 0; color:#bbb}
+
+    /* grid of players */
+    .players{
+      display:grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap:20px; margin-top:18px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px; padding:14px; display:flex; gap:14px; align-items:center; box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      border:1px solid rgba(255,255,255,0.04);
+    }
+
+    .disc-wrap{width:86px; height:86px; position:relative; flex:0 0 86px;}
+    .disc{
+      width:78px; height:78px; border-radius:50%; background:linear-gradient(180deg,#222,#111);
+      border:6px solid rgba(0,0,0,0.6); box-shadow: inset 0 -6px 14px rgba(255,255,255,0.02), 0 6px 18px rgba(0,0,0,0.5);
+      display:grid; place-items:center; font-family:Bangers; font-size:12px; color:var(--accent);
+      transform-origin:center center; transition: transform 0.2s linear;
+    }
+    .disc.playing{ animation:spin 4s linear infinite; }
+    @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+    .disc .label{transform:scale(0.95)}
+
+    .meta{flex:1}
+    .track-title{font-weight:600; font-size:15px; margin:0 0 6px;}
+    .artist{font-size:13px; margin:0 0 8px; color:#bfbfbf}
+
+    .controls{display:flex; gap:10px; align-items:center}
+    .btn{
+      background:var(--glass); border-radius:10px; padding:8px 10px; display:inline-flex; align-items:center; gap:8px; cursor:pointer; border:1px solid rgba(255,255,255,0.03);
+      transition:transform .12s ease, box-shadow .12s ease;
+    }
+    .btn:active{transform:scale(.98)}
+
+    .bigplay{
+      width:46px; height:46px; display:grid; place-items:center; border-radius:10px; font-size:18px; font-weight:700; color:#111; background:linear-gradient(180deg,var(--neon),var(--accent)); box-shadow: 0 8px 18px rgba(0,0,0,0.5);
+    }
+
+    .small{padding:6px 8px; font-size:13px}
+
+    .progress{
+      -webkit-appearance:none; appearance:none; height:8px; width:100%; background:linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border-radius:10px; overflow:hidden; cursor:pointer; outline:none; margin-right:8px;
+    }
+    .progress::-webkit-slider-thumb{ -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:var(--neon); box-shadow: 0 2px 8px rgba(0,0,0,0.6)}
+
+    .time{font-size:12px; color:#cfcfcf; min-width:58px; text-align:right}
+
+    .vol{width:90px}
+
+    footer{margin-top:28px; text-align:center; color:#999}
+
+    /* responsive tweaks */
+    @media (max-width:520px){
+      .card{padding:12px}
+      .disc-wrap{width:64px;height:64px;flex:0 0 64px}
+      .disc{width:60px;height:60px}
+      .bigplay{width:40px;height:40px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo"><h1>pstone</h1></div>
+    <div>
+      <h2 class="title">pstone — Old School Mixtape</h2>
+      <p class="lead">Drop your 6 MP3 files into the <code>mp3/</code> folder and edit the filenames below.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="players" id="players">
+
+      <!-- Each .player-card uses data-src to point to the mp3 file; change the paths to your files -->
+      <div class="card player-card" data-src="da-napulnime-qslite.mp3">
+        <div class="disc-wrap"><div class="disc"><div class="label">01</div></div></div>
+        <div class="meta">
+          <div class="track-title">Да напълним яслите</div>
+          <div class="artist">pstone</div>
+          <div class="controls">
+            <button class="btn bigplay playbtn" aria-label="play">▶</button>
+            <input type="range" class="progress" min="0" max="100" value="0">
+            <div class="time">0:00 / 0:00</div>
+          </div>
+        </div>
+        <audio preload="metadata"></audio>
+      </div>
+
+      <div class="card player-card" data-src="Jutva.mp3">
+        <div class="disc-wrap"><div class="disc"><div class="label">02</div></div></div>
+        <div class="meta">
+          <div class="track-title">Жътва</div>
+          <div class="artist">pstone</div>
+          <div class="controls">
+            <button class="btn bigplay playbtn">▶</button>
+            <input type="range" class="progress" min="0" max="100" value="0">
+            <div class="time">0:00 / 0:00</div>
+          </div>
+        </div>
+        <audio preload="metadata"></audio>
+      </div>
+
+      <div class="card player-card" data-src="lek-den.mp3">
+        <div class="disc-wrap"><div class="disc"><div class="label">03</div></div></div>
+        <div class="meta">
+          <div class="track-title">Лек Ден</div>
+          <div class="artist">pstone</div>
+          <div class="controls">
+            <button class="btn bigplay playbtn">▶</button>
+            <input type="range" class="progress" min="0" max="100" value="0">
+            <div class="time">0:00 / 0:00</div>
+          </div>
+        </div>
+        <audio preload="metadata"></audio>
+      </div>
+
+      <div class="card player-card" data-src="lu-teng.mp3">
+        <div class="disc-wrap"><div class="disc"><div class="label">04</div></div></div>
+        <div class="meta">
+          <div class="track-title">Хитове на Wu-Tang</div>
+          <div class="artist">pstone</div>
+          <div class="controls">
+            <button class="btn bigplay playbtn">▶</button>
+            <input type="range" class="progress" min="0" max="100" value="0">
+            <div class="time">0:00 / 0:00</div>
+          </div>
+        </div>
+        <audio preload="metadata"></audio>
+      </div>
+
+      <div class="card player-card" data-src="Rollbreak.mp3">
+        <div class="disc-wrap"><div class="disc"><div class="label">05</div></div></div>
+        <div class="meta">
+          <div class="track-title">Rollbreak</div>
+          <div class="artist">pstone</div>
+          <div class="controls">
+            <button class="btn bigplay playbtn">▶</button>
+            <input type="range" class="progress" min="0" max="100" value="0">
+            <div class="time">0:00 / 0:00</div>
+          </div>
+        </div>
+        <audio preload="metadata"></audio>
+      </div>
+
+      <div class="card player-card" data-src="mlad.mp3">
+        <div class="disc-wrap"><div class="disc"><div class="label">06</div></div></div>
+        <div class="meta">
+          <div class="track-title">Завинаги Млад</div>
+          <div class="artist">pstone</div>
+          <div class="controls">
+            <button class="btn bigplay playbtn">▶</button>
+            <input type="range" class="progress" min="0" max="100" value="0">
+            <div class="time">0:00 / 0:00</div>
+          </div>
+        </div>
+        <audio preload="metadata"></audio>
+      </div>
+
+    </section>
+
+     
+  </main>
+
+  <script>
+    // grab all players
+    const playerCards = Array.from(document.querySelectorAll('.player-card'));
+    let currentlyPlaying = null;
+
+    function formatTime(sec){
+      if(isNaN(sec)) return '0:00';
+      sec = Math.floor(sec);
+      const m = Math.floor(sec/60);
+      const s = sec%60;
+      return `${m}:${s.toString().padStart(2,'0')}`;
+    }
+
+    playerCards.forEach((card, index)=>{
+      const audio = card.querySelector('audio');
+      const playbtn = card.querySelector('.playbtn');
+      const progress = card.querySelector('.progress');
+      const time = card.querySelector('.time');
+      const disc = card.querySelector('.disc');
+
+      const src = card.dataset.src;
+      audio.src = src;
+
+      // load metadata to show duration
+      audio.addEventListener('loadedmetadata', ()=>{
+        time.textContent = `0:00 / ${formatTime(audio.duration)}`;
+      });
+
+      // play/pause control
+      playbtn.addEventListener('click', ()=>{
+        if(audio.paused){
+          // stop other players
+          if(currentlyPlaying && currentlyPlaying !== audio){
+            currentlyPlaying.pause();
+            const otherCard = currentlyPlaying.closest('.player-card');
+            otherCard.querySelector('.playbtn').textContent = '▶';
+            otherCard.querySelector('.disc').classList.remove('playing');
+          }
+          audio.play();
+          currentlyPlaying = audio;
+          playbtn.textContent = '❚❚';
+          disc.classList.add('playing');
+        } else {
+          audio.pause();
+          playbtn.textContent = '▶';
+          disc.classList.remove('playing');
+        }
+      });
+
+      // update progress as audio plays
+      audio.addEventListener('timeupdate', ()=>{
+        if(audio.duration) {
+          const pct = (audio.currentTime / audio.duration) * 100;
+          progress.value = pct;
+          time.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+        }
+      });
+
+      // seek
+      let isSeeking = false;
+      progress.addEventListener('input', (e)=>{
+        isSeeking = true;
+        const pct = e.target.value / 100;
+        if(audio.duration){
+          const newTime = pct * audio.duration;
+          time.textContent = `${formatTime(newTime)} / ${formatTime(audio.duration)}`;
+        }
+      });
+      progress.addEventListener('change', (e)=>{
+        const pct = e.target.value / 100;
+        if(audio.duration){
+          audio.currentTime = pct * audio.duration;
+        }
+        isSeeking = false;
+      });
+
+      // when track ends
+      audio.addEventListener('ended', ()=>{
+        playbtn.textContent = '▶';
+        disc.classList.remove('playing');
+      });
+
+      // preload error handling
+      audio.addEventListener('error', ()=>{
+        card.querySelector('.track-title').textContent = 'Missing / invalid MP3 — ' + (src);
+        card.style.opacity = 0.6;
+      });
+
+    });
+
+    // Optional: keyboard shortcuts (space toggles currently focused player's play)
+    window.addEventListener('keydown', (e)=>{
+      if(e.code === 'Space'){
+        e.preventDefault();
+        // if there's a playing audio, toggle it, otherwise toggle first
+        const audio = currentlyPlaying || document.querySelector('audio');
+        if(!audio) return;
+        const playbtn = audio.closest('.player-card').querySelector('.playbtn');
+        playbtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
